@@ -41,9 +41,6 @@
             border-radius: 5px;
             box-sizing: border-box;
         }
-        .form-group input[type="file"] {
-            padding: 3px;
-        }
         button {
             width: 100%;
             padding: 10px 15px;
@@ -78,10 +75,6 @@
             <label for="contact-phone">Contact Phone</label>
             <input type="tel" id="contact-phone">
         </div>
-        <div class="form-group">
-            <label for="job-image">Job Image</label>
-            <input type="file" id="job-image" accept="image/*">
-        </div>
         <button id="submit-btn">Submit</button>
     </div>
 
@@ -94,17 +87,11 @@
             return phoneRegex.test(phoneNumber);
         }
 
-        console.log('Form is ready.');
-
         document.getElementById('submit-btn').addEventListener('click', () => {
             const jobTitle = document.getElementById('job-title').value;
             const jobDescription = document.getElementById('job-description').value;
             const contactEmail = document.getElementById('contact-email').value;
             const contactPhone = document.getElementById('contact-phone').value;
-            const jobImageInput = document.getElementById('job-image');
-            const jobImageFile = jobImageInput.files[0];
-
-            console.log('Form submitted with:', { jobTitle, jobDescription, contactEmail, contactPhone, jobImageFile });
 
             if (jobTitle && jobDescription) {
                 if (contactPhone && !validatePhoneNumber(contactPhone)) {
@@ -119,31 +106,23 @@
                     contactPhone: contactPhone || 'N/A'
                 };
 
-                if (jobImageFile) {
-                    const reader = new FileReader();
-                    reader.onload = function(event) {
-                        jobDetails.jobImage = event.target.result;
-                        sendJobDetails(jobDetails);
-                    };
-                    reader.readAsDataURL(jobImageFile);
+                if (JSON.stringify(jobDetails).length <= 4096) {
+                    sendJobData(jobDetails);
                 } else {
-                    jobDetails.jobImage = 'N/A';
-                    sendJobDetails(jobDetails);
+                    alert('The data is too long. Please shorten the job description.');
                 }
             } else {
                 alert('Please fill out the job title and description.');
             }
         });
 
-        function sendJobDetails(jobDetails) {
-            console.log('Sending data to Telegram:', jobDetails);
-
-            // Debugging step: Verify if Telegram.WebApp is defined
-            if (Telegram.WebApp) {
+        function sendJobData(jobDetails) {
+            try {
                 Telegram.WebApp.sendData(JSON.stringify(jobDetails)); // Send data to the bot
                 Telegram.WebApp.close(); // Close the web app
-            } else {
-                console.error('Telegram.WebApp is not defined');
+            } catch (error) {
+                console.error('Error sending data to Telegram:', error);
+                alert('Error sending data to Telegram. Please try again.');
             }
         }
 
