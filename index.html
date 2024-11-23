@@ -60,20 +60,36 @@
     <div class="container">
         <h1>Post a Job</h1>
         <div class="form-group">
-            <label for="job-title">Job Title</label>
+            <label for="job-title">Title</label>
             <input type="text" id="job-title" required>
         </div>
         <div class="form-group">
-            <label for="job-description">Job Description</label>
+            <label for="job-description">Description</label>
             <textarea id="job-description" rows="4" required></textarea>
         </div>
         <div class="form-group">
-            <label for="contact-email">Contact Email</label>
-            <input type="email" id="contact-email" required>
+            <label for="job-qualification">Qualification</label>
+            <input id="job-qualification" required>
         </div>
         <div class="form-group">
-            <label for="contact-phone">Contact Phone</label>
-            <input type="tel" id="contact-phone">
+            <label for="job-experience">Experience</label>
+            <input id="job-experience" required>
+        </div>
+        <div class="form-group">
+            <label for="job-location">Location</label>
+            <input id="job-location" rows="4" required>
+        </div>
+        <div class="form-group">
+            <label for="contact-email">Email</label>
+            <input type="email" id="contact-email">
+        </div>
+        <div class="form-group">
+            <label for="contact-phone">Phone</label>
+            <input type="tel" id="contact-phone" required>
+        </div>
+        <div class="form-group">
+            <label for="important-notes">Important Notes</label>
+            <textarea id="important-notes" rows="4"></textarea>
         </div>
         <button id="submit-btn">Submit</button>
     </div>
@@ -90,8 +106,13 @@
         document.getElementById('submit-btn').addEventListener('click', () => {
             const jobTitle = document.getElementById('job-title').value;
             const jobDescription = document.getElementById('job-description').value;
+            const jobQualification = document.getElementById('job-qualification').value;
+            const jobExperience = document.getElementById('job-experience').value;
+            const jobLocation = document.getElementById('job-location').value;
             const contactEmail = document.getElementById('contact-email').value;
             const contactPhone = document.getElementById('contact-phone').value;
+            const importantNotes = document.getElementById('important-notes').value;
+            
 
             if (jobTitle && jobDescription) {
                 if (contactPhone && !validatePhoneNumber(contactPhone)) {
@@ -102,8 +123,12 @@
                 const jobDetails = {
                     jobTitle,
                     jobDescription,
+                    jobQualification,
+                    jobExperience,
+                    jobLocation,
                     contactEmail: contactEmail || 'N/A',
-                    contactPhone: contactPhone || 'N/A'
+                    contactPhone: contactPhone || 'N/A',
+                    importantNotes
                 };
 
                 if (JSON.stringify(jobDetails).length <= 4096) {
