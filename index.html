@@ -3,155 +3,321 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Job Information Form</title>
-    
+    <title>Submit Job Post</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .container {
-            background-color: #fff;
             padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
             max-width: 600px;
             width: 100%;
         }
+
         h1 {
-            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
             margin-bottom: 20px;
         }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
+
+        label {
             display: block;
-            margin-bottom: 5px;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
         }
-        .form-group input, .form-group textarea {
+
+        input, textarea, select {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s;
+            font-family: inherit;
         }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .required {
+            color: #e74c3c;
+        }
+
         button {
             width: 100%;
-            padding: 10px 15px;
-            background-color: #28a745;
-            color: #fff;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
             border: none;
-            border-radius: 5px;
-            cursor: pointer;
+            border-radius: 10px;
             font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
         }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
         button:disabled {
-            background-color: #ccc;
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .user-info {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #666;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Post a Job</h1>
-        <div class="form-group">
-            <label for="job-title">Title</label>
-            <input type="text" id="job-title" required>
+        <h1>📋 Submit Job Post</h1>
+        <p class="subtitle">Fill in the details to post a new job opportunity</p>
+
+        <div id="userInfo" class="user-info" style="display: none;">
+            👤 Logged in as: <strong id="userName"></strong>
         </div>
-        <div class="form-group">
-            <label for="job-description">Description</label>
-            <textarea id="job-description" rows="4" required></textarea>
-        </div>
-        <div class="form-group">
-            <label for="job-qualification">Qualification</label>
-            <input id="job-qualification" required>
-        </div>
-        <div class="form-group">
-            <label for="job-experience">Experience</label>
-            <input id="job-experience" required>
-        </div>
-        <div class="form-group">
-            <label for="job-location">Location</label>
-            <input id="job-location" rows="4" required>
-        </div>
-        <div class="form-group">
-            <label for="contact-email">Email</label>
-            <input type="email" id="contact-email">
-        </div>
-        <div class="form-group">
-            <label for="contact-phone">Phone</label>
-            <input type="tel" id="contact-phone" required>
-        </div>
-        <div class="form-group">
-            <label for="important-notes">Important Notes</label>
-            <textarea id="important-notes" rows="4"></textarea>
-        </div>
-        <button id="submit-btn">Submit</button>
+
+        <div id="alert" class="alert"></div>
+
+        <form id="jobForm">
+            <div class="form-group">
+                <label for="title">Job Title <span class="required">*</span></label>
+                <input type="text" id="title" name="title" required placeholder="e.g., Senior Frontend Developer">
+            </div>
+
+            <div class="form-group">
+                <label for="company">Company Name <span class="required">*</span></label>
+                <input type="text" id="company" name="company" required placeholder="e.g., Tech Corp Inc.">
+            </div>
+
+            <div class="form-group">
+                <label for="location">Location <span class="required">*</span></label>
+                <input type="text" id="location" name="location" required placeholder="e.g., Remote, New York, or Bangalore">
+            </div>
+
+            <div class="form-group">
+                <label for="type">Job Type <span class="required">*</span></label>
+                <select id="type" name="type" required>
+                    <option value="">Select job type</option>
+                    <option value="Full-time">Full-time</option>
+                    <option value="Part-time">Part-time</option>
+                    <option value="Contract">Contract</option>
+                    <option value="Freelance">Freelance</option>
+                    <option value="Internship">Internship</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="salary">Salary Range</label>
+                <input type="text" id="salary" name="salary" placeholder="e.g., $80,000 - $120,000 or Not disclosed">
+            </div>
+
+            <div class="form-group">
+                <label for="description">Job Description <span class="required">*</span></label>
+                <textarea id="description" name="description" required placeholder="Describe the role, responsibilities, and requirements..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Contact Method <span class="required">*</span></label>
+                <p style="font-size: 12px; color: #666; margin-bottom: 10px;">Provide at least one contact method</p>
+            </div>
+
+            <div class="form-group">
+                <label for="applyLink">Application Link</label>
+                <input type="url" id="applyLink" name="applyLink" placeholder="https://company.com/apply">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="jobs@company.com">
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone/WhatsApp Number</label>
+                <input type="tel" id="phone" name="phone" placeholder="+1 234 567 8900 or WhatsApp: +91 98765 43210">
+            </div>
+
+            <button type="submit" id="submitBtn">Submit Job Post</button>
+        </form>
     </div>
 
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
-        Telegram.WebApp.ready();
+        // Configuration - Update these values
+        const CONFIG = {
+            WORKER_URL: 'https://your-worker.your-subdomain.workers.dev/api/submit-job',
+            WEBHOOK_SECRET: 'your-random-secret-key-here',
+            // Get user ID from Telegram Web App or manual entry
+            USER_ID: null
+        };
 
-        function validatePhoneNumber(phoneNumber) {
-            const phoneRegex = /^\+?[1-9]\d{1,14}$/; // Regex for international phone numbers
-            return phoneRegex.test(phoneNumber);
+        // Check if running in Telegram Web App
+        if (window.Telegram && window.Telegram.WebApp) {
+            const tg = window.Telegram.WebApp;
+            tg.expand();
+            
+            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                CONFIG.USER_ID = tg.initDataUnsafe.user.id;
+                document.getElementById('userName').textContent = tg.initDataUnsafe.user.first_name || 'User';
+                document.getElementById('userInfo').style.display = 'block';
+            }
+        } else {
+            // For testing outside Telegram, manually set user ID
+            // In production, you should authenticate properly
+            CONFIG.USER_ID = prompt('Enter your Telegram User ID for testing:');
         }
 
-        document.getElementById('submit-btn').addEventListener('click', () => {
-            const jobTitle = document.getElementById('job-title').value;
-            const jobDescription = document.getElementById('job-description').value;
-            const jobQualification = document.getElementById('job-qualification').value;
-            const jobExperience = document.getElementById('job-experience').value;
-            const jobLocation = document.getElementById('job-location').value;
-            const contactEmail = document.getElementById('contact-email').value;
-            const contactPhone = document.getElementById('contact-phone').value;
-            const importantNotes = document.getElementById('important-notes').value;
-            
+        const form = document.getElementById('jobForm');
+        const alertBox = document.getElementById('alert');
+        const submitBtn = document.getElementById('submitBtn');
 
-            if (jobTitle && jobDescription) {
-                if (contactPhone && !validatePhoneNumber(contactPhone)) {
-                    alert('Please enter a valid phone number.');
-                    return;
-                }
+        function showAlert(message, type) {
+            alertBox.textContent = message;
+            alertBox.className = `alert ${type} show`;
+            setTimeout(() => {
+                alertBox.classList.remove('show');
+            }, 5000);
+        }
 
-                const jobDetails = {
-                    jobTitle,
-                    jobDescription,
-                    jobQualification,
-                    jobExperience,
-                    jobLocation,
-                    contactEmail: contactEmail || 'N/A',
-                    contactPhone: contactPhone || 'N/A',
-                    importantNotes
-                };
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
 
-                if (JSON.stringify(jobDetails).length <= 4096) {
-                    sendJobData(jobDetails);
+            if (!CONFIG.USER_ID) {
+                showAlert('User ID not found. Please open this form through Telegram.', 'error');
+                return;
+            }
+
+            // Validate at least one contact method
+            const applyLink = document.getElementById('applyLink').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+
+            if (!applyLink && !email && !phone) {
+                showAlert('⚠️ Please provide at least one contact method (Link, Email, or Phone)', 'error');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+
+            const formData = {
+                title: document.getElementById('title').value,
+                company: document.getElementById('company').value,
+                location: document.getElementById('location').value,
+                type: document.getElementById('type').value,
+                salary: document.getElementById('salary').value,
+                description: document.getElementById('description').value,
+                applyLink: applyLink,
+                email: email,
+                phone: phone,
+                userId: CONFIG.USER_ID,
+                secret: CONFIG.WEBHOOK_SECRET
+            };
+
+            try {
+                const response = await fetch(CONFIG.WORKER_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAlert('✅ Job submitted successfully! It will be reviewed before posting.', 'success');
+                    form.reset();
+                    
+                    // Close Telegram Web App after success
+                    if (window.Telegram && window.Telegram.WebApp) {
+                        setTimeout(() => {
+                            window.Telegram.WebApp.close();
+                        }, 2000);
+                    }
                 } else {
-                    alert('The data is too long. Please shorten the job description.');
+                    showAlert('❌ Error: ' + (result.error || 'Submission failed'), 'error');
                 }
-            } else {
-                alert('Please fill out the job title and description.');
+            } catch (error) {
+                showAlert('❌ Network error. Please try again.', 'error');
+                console.error(error);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Job Post';
             }
         });
-
-        function sendJobData(jobDetails) {
-            try {
-                Telegram.WebApp.sendData(JSON.stringify(jobDetails)); // Send data to the bot
-                Telegram.WebApp.close(); // Close the web app
-            } catch (error) {
-                console.error('Error sending data to Telegram:', error);
-                alert('Error sending data to Telegram. Please try again.');
-            }
-        }
-
-        Telegram.WebApp.expand();
     </script>
 </body>
 </html>
