@@ -11,14 +11,14 @@
 
   <title>Submit Job Post</title>
 
-  <!-- Telegram Mini App SDK (MANDATORY) -->
+  <!-- Telegram Mini App SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <style>
-    /* ===== TELEGRAM FIXES ===== */
+    /* ========= TELEGRAM FIXES ========= */
     html, body {
       height: 100%;
-      overflow: auto;
+      overflow-y: auto;
       -webkit-overflow-scrolling: touch;
     }
 
@@ -26,7 +26,7 @@
       overscroll-behavior: contain;
     }
 
-    /* ===== YOUR UI STYLES ===== */
+    /* ========= BASE STYLES ========= */
     * {
       margin: 0;
       padding: 0;
@@ -36,22 +36,19 @@
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
       padding: 16px;
     }
 
+    /* ❌ NO FLEX CENTERING (CRITICAL FIX) */
+    /* ✅ SAFE CENTERING */
     .container {
       background: white;
       border-radius: 20px;
       box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      padding: 30px;
+      padding: 28px;
       width: 100%;
       max-width: 600px;
-      max-height: 90vh;
-      overflow-y: auto;
+      margin: 0 auto;
     }
 
     h1 {
@@ -60,8 +57,8 @@
     }
 
     .subtitle {
-      color: #666;
       font-size: 14px;
+      color: #666;
       margin-bottom: 20px;
     }
 
@@ -90,6 +87,7 @@
       border-radius: 10px;
       border: 2px solid #e0e0e0;
       font-size: 14px;
+      background: white;
     }
 
     input:focus, textarea:focus, select:focus {
@@ -112,7 +110,7 @@
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
-      margin-top: 10px;
+      margin-top: 12px;
     }
 
     button:disabled {
@@ -229,7 +227,8 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       if (!window.Telegram || !Telegram.WebApp) {
-        document.body.innerHTML = '<h2 style="color:white">Open this from Telegram</h2>';
+        document.body.innerHTML =
+          '<h2 style="color:white;text-align:center">Open this page from Telegram</h2>';
         return;
       }
 
@@ -237,6 +236,7 @@
       tg.ready();
       tg.expand();
       tg.enableClosingConfirmation();
+      tg.disableVerticalSwipes();
 
       const user = tg.initDataUnsafe?.user;
       if (!user) {
