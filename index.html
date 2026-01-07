@@ -2,20 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-
-  <!-- Telegram-safe viewport -->
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
   />
-
   <title>Submit Job Post</title>
-
-  <!-- Telegram Mini App SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <style>
-    /* ========= TELEGRAM FIXES ========= */
     html, body {
       height: 100%;
       overflow-y: auto;
@@ -26,7 +20,6 @@
       overscroll-behavior: contain;
     }
 
-    /* ========= BASE STYLES ========= */
     * {
       margin: 0;
       padding: 0;
@@ -39,8 +32,6 @@
       padding: 16px;
     }
 
-    /* ❌ NO FLEX CENTERING (CRITICAL FIX) */
-    /* ✅ SAFE CENTERING */
     .container {
       background: white;
       border-radius: 20px;
@@ -138,6 +129,10 @@
     .alert.show {
       display: block;
     }
+
+    .required {
+      color: #e74c3c;
+    }
   </style>
 </head>
 
@@ -154,55 +149,59 @@
 
     <form id="jobForm">
       <div class="form-group">
-        <label>Job Title *</label>
-        <input id="title" required />
+        <label>Job Title <span class="required">*</span></label>
+        <input type="text" id="title" required placeholder="e.g., Senior Frontend Developer" />
       </div>
 
       <div class="form-group">
-        <label>Company *</label>
-        <input id="company" required />
+        <label>Company Name <span class="required">*</span></label>
+        <input type="text" id="company" required placeholder="e.g., Tech Corp Inc." />
       </div>
 
       <div class="form-group">
-        <label>Location *</label>
-        <input id="location" required />
+        <label>Location <span class="required">*</span></label>
+        <input type="text" id="location" required placeholder="e.g., Remote, New York, or Bangalore" />
       </div>
 
       <div class="form-group">
-        <label>Job Type *</label>
+        <label>Job Type <span class="required">*</span></label>
         <select id="type" required>
-          <option value="">Select</option>
-          <option>Full-time</option>
-          <option>Part-time</option>
-          <option>Contract</option>
-          <option>Freelance</option>
-          <option>Internship</option>
+          <option value="">Select job type</option>
+          <option value="Full-time">Full-time</option>
+          <option value="Part-time">Part-time</option>
+          <option value="Contract">Contract</option>
+          <option value="Freelance">Freelance</option>
+          <option value="Internship">Internship</option>
         </select>
       </div>
 
       <div class="form-group">
-        <label>Salary</label>
-        <input id="salary" />
+        <label>Salary Range</label>
+        <input type="text" id="salary" placeholder="e.g., $80,000 - $120,000 or Not disclosed" />
       </div>
 
       <div class="form-group">
-        <label>Description *</label>
-        <textarea id="description" required></textarea>
+        <label>Job Description <span class="required">*</span></label>
+        <textarea id="description" required placeholder="Describe the role, responsibilities, and requirements..."></textarea>
+      </div>
+
+      <p style="font-size: 13px; color: #666; margin: 16px 0 8px;">
+        <strong>Contact Method:</strong> Provide at least one
+      </p>
+
+      <div class="form-group">
+        <label>Application Link</label>
+        <input type="url" id="applyLink" placeholder="https://company.com/apply" />
       </div>
 
       <div class="form-group">
-        <label>Apply Link</label>
-        <input id="applyLink" type="url" />
+        <label>Email Address</label>
+        <input type="email" id="email" placeholder="jobs@company.com" />
       </div>
 
       <div class="form-group">
-        <label>Email</label>
-        <input id="email" type="email" />
-      </div>
-
-      <div class="form-group">
-        <label>Phone / WhatsApp</label>
-        <input id="phone" />
+        <label>Phone / WhatsApp Number</label>
+        <input type="tel" id="phone" placeholder="+1 234 567 8900 or WhatsApp: +91 98765 43210" />
       </div>
 
       <button id="submitBtn" type="submit">Submit Job Post</button>
@@ -222,13 +221,14 @@
     function showAlert(msg, type) {
       alertBox.textContent = msg;
       alertBox.className = `alert ${type} show`;
-      setTimeout(() => alertBox.classList.remove('show'), 4000);
+      setTimeout(() => alertBox.classList.remove('show'), 5000);
     }
 
+    // Initialize Telegram Web App
     document.addEventListener('DOMContentLoaded', () => {
       if (!window.Telegram || !Telegram.WebApp) {
         document.body.innerHTML =
-          '<h2 style="color:white;text-align:center">Open this page from Telegram</h2>';
+          '<div style="color:white;text-align:center;padding:40px;"><h2>⚠️ Open this page from Telegram</h2><p>This form must be opened through a Telegram bot.</p></div>';
         return;
       }
 
@@ -240,7 +240,7 @@
 
       const user = tg.initDataUnsafe?.user;
       if (!user) {
-        alert('Unable to verify Telegram user');
+        alert('Unable to verify Telegram user. Please try again.');
         tg.close();
         return;
       }
@@ -250,25 +250,44 @@
       document.getElementById('userInfo').style.display = 'block';
     });
 
+    // Form submission
     document.getElementById('jobForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
+      if (!CONFIG.USER_ID) {
+        showAlert('❌ User ID not found. Please open this form through Telegram.', 'error');
+        return;
+      }
+
+      // Validate at least one contact method
+      const applyLink = document.getElementById('applyLink').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+
+      if (!applyLink && !email && !phone) {
+        showAlert('⚠️ Please provide at least one contact method (Link, Email, or Phone)', 'error');
+        return;
+      }
+
+      // Build payload with explicit getElementById calls
       const payload = {
-        title: title.value,
-        company: company.value,
-        location: location.value,
-        type: type.value,
-        salary: salary.value,
-        description: description.value,
-        applyLink: applyLink.value,
-        email: email.value,
-        phone: phone.value,
+        title: document.getElementById('title').value.trim(),
+        company: document.getElementById('company').value.trim(),
+        location: document.getElementById('location').value.trim(),
+        type: document.getElementById('type').value,
+        salary: document.getElementById('salary').value.trim(),
+        description: document.getElementById('description').value.trim(),
+        applyLink: applyLink,
+        email: email,
+        phone: phone,
         userId: CONFIG.USER_ID,
         secret: CONFIG.WEBHOOK_SECRET
       };
 
+      console.log('Submitting job:', payload); // Debug log
+
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Submitting…';
+      submitBtn.textContent = 'Submitting...';
 
       try {
         const res = await fetch(CONFIG.WORKER_URL, {
@@ -278,14 +297,23 @@
         });
 
         const data = await res.json();
+        
         if (data.success) {
-          showAlert('✅ Job submitted for review', 'success');
-          setTimeout(() => Telegram.WebApp.close(), 2000);
+          showAlert('✅ Job submitted successfully! It will be reviewed before posting.', 'success');
+          document.getElementById('jobForm').reset();
+          
+          // Close Telegram Web App after success
+          setTimeout(() => {
+            if (window.Telegram && Telegram.WebApp) {
+              Telegram.WebApp.close();
+            }
+          }, 2000);
         } else {
-          showAlert(data.error || 'Submission failed', 'error');
+          showAlert('❌ Error: ' + (data.error || 'Submission failed'), 'error');
         }
-      } catch {
-        showAlert('Network error', 'error');
+      } catch (error) {
+        showAlert('❌ Network error. Please try again.', 'error');
+        console.error('Submission error:', error);
       } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = 'Submit Job Post';
