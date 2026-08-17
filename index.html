@@ -133,6 +133,117 @@
     .required {
       color: #e74c3c;
     }
+
+    .view-tabs {
+      display: flex;
+      gap: 8px;
+      margin: 0 0 20px;
+      padding: 4px;
+      background: #f5f6fa;
+      border-radius: 12px;
+    }
+
+    .view-tab {
+      flex: 1;
+      margin: 0;
+      padding: 10px 12px;
+      background: transparent;
+      color: #667085;
+      font-size: 14px;
+    }
+
+    .view-tab.active {
+      background: white;
+      color: #4f46e5;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .jobs-panel {
+      display: none;
+    }
+
+    .jobs-panel.active {
+      display: block;
+    }
+
+    .jobs-toolbar {
+      display: grid;
+      grid-template-columns: 1fr 150px;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .jobs-toolbar input,
+    .jobs-toolbar select {
+      min-width: 0;
+    }
+
+    .refresh-button {
+      width: 100%;
+      margin: 0 0 16px;
+      padding: 11px;
+      font-size: 14px;
+    }
+
+    .jobs-status {
+      color: #667085;
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
+
+    .job-card {
+      border: 1px solid #e7e7ef;
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 12px;
+      background: #fff;
+    }
+
+    .job-card h2 {
+      font-size: 17px;
+      line-height: 1.35;
+      margin-bottom: 6px;
+    }
+
+    .job-company {
+      color: #4f46e5;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .job-meta {
+      color: #667085;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .job-description {
+      color: #475467;
+      font-size: 13px;
+      line-height: 1.5;
+      margin: 10px 0;
+    }
+
+    .apply-button {
+      display: inline-block;
+      width: auto;
+      margin: 4px 0 0;
+      padding: 10px 16px;
+      text-decoration: none;
+      text-align: center;
+    }
+
+    .empty-state {
+      padding: 24px 8px;
+      text-align: center;
+      color: #667085;
+      font-size: 14px;
+    }
+
+    @media (max-width: 480px) {
+      .container { padding: 20px; }
+      .jobs-toolbar { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 
@@ -146,6 +257,28 @@
     </div>
 
     <div id="alert" class="alert"></div>
+
+    <div class="view-tabs" role="tablist" aria-label="Job bot views">
+      <button type="button" class="view-tab active" data-view="submit">Submit a job</button>
+      <button type="button" class="view-tab" data-view="jobs">Latest jobs</button>
+    </div>
+
+    <section id="jobsPanel" class="jobs-panel" aria-labelledby="jobsHeading">
+      <h2 id="jobsHeading" style="font-size:22px; margin-bottom:6px;">📢 Latest Bengaluru Jobs</h2>
+      <p class="subtitle">New openings from the last 7 days. Apply through the official listing.</p>
+
+      <form id="jobsFilterForm" class="jobs-toolbar">
+        <input id="jobSearch" type="search" placeholder="Search title, company, or skill" aria-label="Search jobs" />
+        <select id="jobCategory" aria-label="Filter by category">
+          <option value="">All categories</option>
+          <option value="private">Private jobs</option>
+          <option value="government">Government / PSU</option>
+        </select>
+      </form>
+      <button id="refreshJobs" type="button" class="refresh-button">Refresh latest jobs</button>
+      <div id="jobsStatus" class="jobs-status" aria-live="polite"></div>
+      <div id="jobsList"></div>
+    </section>
 
     <form id="jobForm">
       <div class="form-group">
@@ -211,12 +344,18 @@
   <script>
     const CONFIG = {
       WORKER_URL: 'https://tgjbt.puneethtpp.workers.dev/api/submit-job',
-      WEBHOOK_SECRET: '3ygAcpfz3wHrT8gFXrSodMlPOrjCd6XG',
+      LATEST_JOBS_URL: 'https://tgjbt.puneethtpp.workers.dev/api/latest-jobs',
       USER_ID: null
     };
 
     const alertBox = document.getElementById('alert');
     const submitBtn = document.getElementById('submitBtn');
+    const jobForm = document.getElementById('jobForm');
+    const jobsPanel = document.getElementById('jobsPanel');
+    const jobsList = document.getElementById('jobsList');
+    const jobsStatus = document.getElementById('jobsStatus');
+    const jobsFilterForm = document.getElementById('jobsFilterForm');
+    let telegramWebApp = null;
 
     function showAlert(msg, type) {
       alertBox.textContent = msg;
@@ -224,34 +363,122 @@
       setTimeout(() => alertBox.classList.remove('show'), 5000);
     }
 
-    // Initialize Telegram Web App
+    function escapeHtml(value) {
+      return String(value || '').replace(/[&<>'"]/g, character => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+      }[character]));
+    }
+
+    function safeApplyLink(value) {
+      try {
+        const url = new URL(value);
+        return ['http:', 'https:'].includes(url.protocol) ? url.toString() : '';
+      } catch (_) {
+        return '';
+      }
+    }
+
+    function formatJobDate(value) {
+      const date = new Date(value);
+      return Number.isNaN(date.getTime())
+        ? 'Date not specified'
+        : date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    function setView(view, updateUrl = true) {
+      const showJobs = view === 'jobs';
+      jobForm.style.display = showJobs ? 'none' : 'block';
+      jobsPanel.classList.toggle('active', showJobs);
+      document.querySelectorAll('.view-tab').forEach(button => {
+        button.classList.toggle('active', button.dataset.view === view);
+      });
+      if (updateUrl) {
+        const nextUrl = new URL(window.location.href);
+        if (showJobs) nextUrl.searchParams.set('view', 'jobs');
+        else nextUrl.searchParams.delete('view');
+        window.history.replaceState({}, '', nextUrl);
+      }
+      if (showJobs) loadJobs();
+    }
+
+    function renderJobs(jobs) {
+      if (!jobs.length) {
+        jobsList.innerHTML = '<div class="empty-state">No matching jobs were found in the latest 7-day window.</div>';
+        return;
+      }
+
+      jobsList.innerHTML = jobs.map(job => {
+        const applyLink = safeApplyLink(job.applyLink);
+        const contact = [job.email, job.phone].filter(Boolean).map(escapeHtml).join(' · ');
+        const action = applyLink
+          ? `<a class="apply-button" href="${escapeHtml(applyLink)}" target="_blank" rel="noopener noreferrer">🔗 Apply now</a>`
+          : (contact ? `<div class="job-meta">Contact: ${contact}</div>` : '<div class="job-meta">Application details are in the listing.</div>');
+        return `<article class="job-card">
+          <h2>${escapeHtml(job.title)}</h2>
+          <div class="job-company">🏢 ${escapeHtml(job.company)}</div>
+          <div class="job-meta">📍 ${escapeHtml(job.location)} · 🧾 ${escapeHtml(job.jobType)}<br>🗓️ Posted ${escapeHtml(formatJobDate(job.publishedAt))}</div>
+          ${job.deadline ? `<div class="job-meta">⏳ Apply by ${escapeHtml(formatJobDate(job.deadline))}</div>` : ''}
+          ${job.salary ? `<div class="job-meta">💰 ${escapeHtml(job.salary)}</div>` : ''}
+          ${job.description ? `<p class="job-description">${escapeHtml(job.description)}</p>` : ''}
+          ${action}
+        </article>`;
+      }).join('');
+    }
+
+    async function loadJobs() {
+      const query = document.getElementById('jobSearch').value.trim();
+      const category = document.getElementById('jobCategory').value;
+      const params = new URLSearchParams({ limit: '50', days: '7' });
+      if (query) params.set('q', query);
+      if (category) params.set('category', category);
+
+      jobsStatus.textContent = 'Loading latest jobs…';
+      jobsList.innerHTML = '';
+      try {
+        const res = await fetch(`${CONFIG.LATEST_JOBS_URL}?${params.toString()}`);
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || 'Unable to load jobs');
+        jobsStatus.textContent = `${data.count} latest job${data.count === 1 ? '' : 's'} found`;
+        renderJobs(data.jobs || []);
+      } catch (error) {
+        jobsStatus.textContent = '';
+        jobsList.innerHTML = `<div class="empty-state">Unable to load jobs right now. Please try again.</div>`;
+        console.error('Latest jobs error:', error);
+      }
+    }
+
+    // Initialize Telegram Web App when available. The public jobs view also works in a normal browser.
     document.addEventListener('DOMContentLoaded', () => {
-      if (!window.Telegram || !Telegram.WebApp) {
-        document.body.innerHTML =
-          '<div style="color:white;text-align:center;padding:40px;"><h2>⚠️ Open this page from Telegram</h2><p>This form must be opened through a Telegram bot.</p></div>';
-        return;
+      telegramWebApp = window.Telegram?.WebApp || null;
+      if (telegramWebApp?.initDataUnsafe?.user) {
+        telegramWebApp.ready();
+        telegramWebApp.expand();
+        telegramWebApp.enableClosingConfirmation();
+        telegramWebApp.disableVerticalSwipes();
+        const user = telegramWebApp.initDataUnsafe.user;
+        CONFIG.USER_ID = user.id;
+        document.getElementById('userName').textContent = user.first_name || 'User';
+        document.getElementById('userInfo').style.display = 'block';
       }
 
-      const tg = Telegram.WebApp;
-      tg.ready();
-      tg.expand();
-      tg.enableClosingConfirmation();
-      tg.disableVerticalSwipes();
+      document.querySelectorAll('.view-tab').forEach(button => {
+        button.addEventListener('click', () => setView(button.dataset.view));
+      });
+      jobsFilterForm.addEventListener('submit', event => {
+        event.preventDefault();
+        loadJobs();
+      });
+      document.getElementById('refreshJobs').addEventListener('click', loadJobs);
 
-      const user = tg.initDataUnsafe?.user;
-      if (!user) {
-        alert('Unable to verify Telegram user. Please try again.');
-        tg.close();
-        return;
+      const initialView = new URLSearchParams(window.location.search).get('view') === 'jobs' ? 'jobs' : 'submit';
+      setView(initialView, false);
+      if (initialView === 'submit' && !CONFIG.USER_ID) {
+        showAlert('The job browser is public. Open the Submit tab from Telegram to post a job.', 'error');
       }
-
-      CONFIG.USER_ID = user.id;
-      document.getElementById('userName').textContent = user.first_name || 'User';
-      document.getElementById('userInfo').style.display = 'block';
     });
 
     // Form submission
-    document.getElementById('jobForm').addEventListener('submit', async (e) => {
+    jobForm.addEventListener('submit', async (e) => {
       e.preventDefault();
 
       if (!CONFIG.USER_ID) {
@@ -281,10 +508,8 @@
         email: email,
         phone: phone,
         userId: CONFIG.USER_ID,
-        secret: CONFIG.WEBHOOK_SECRET
+        initData: telegramWebApp?.initData || ''
       };
-
-      console.log('Submitting job:', payload); // Debug log
 
       submitBtn.disabled = true;
       submitBtn.textContent = 'Submitting...';
