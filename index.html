@@ -501,7 +501,9 @@
       });
       document.getElementById('refreshJobs').addEventListener('click', loadJobs);
 
-      const initialView = new URLSearchParams(window.location.search).get('view') === 'jobs' ? 'jobs' : 'submit';
+      const queryRequestsJobs = new URLSearchParams(window.location.search).get('view') === 'jobs';
+      const miniAppRequestsJobs = telegramWebApp?.initDataUnsafe?.start_param === 'jobs';
+      const initialView = queryRequestsJobs || miniAppRequestsJobs ? 'jobs' : 'submit';
       setView(CONFIG.USER_ID ? initialView : 'jobs', false);
       checkSubmitAccess();
     });
