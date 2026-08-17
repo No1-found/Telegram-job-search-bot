@@ -345,6 +345,7 @@
     const CONFIG = {
       WORKER_URL: 'https://tgjbt.puneethtpp.workers.dev/api/submit-job',
       LATEST_JOBS_URL: 'https://tgjbt.puneethtpp.workers.dev/api/latest-jobs',
+      ACCESS_CHECK_URL: 'https://tgjbt.puneethtpp.workers.dev/api/access-check',
       USER_ID: null
     };
 
@@ -447,6 +448,36 @@
       }
     }
 
+    async function checkSubmitAccess() {
+      const submitTab = document.querySelector('.view-tab[data-view="submit"]');
+      if (!telegramWebApp?.initData || !CONFIG.USER_ID) {
+        submitTab.hidden = true;
+        setView('jobs', false);
+        return;
+      }
+
+      try {
+        const res = await fetch(CONFIG.ACCESS_CHECK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ initData: telegramWebApp.initData })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success || !data.canSubmit) {
+          submitTab.hidden = true;
+          setView('jobs', false);
+          showAlert('Browse access enabled. Job submission is limited to authorized users.', 'error');
+          return;
+        }
+        submitTab.hidden = false;
+      } catch (error) {
+        submitTab.hidden = true;
+        setView('jobs', false);
+        showAlert('Could not verify submission access. Browse mode enabled.', 'error');
+        console.error('Access check error:', error);
+      }
+    }
+
     // Initialize Telegram Web App when available. The public jobs view also works in a normal browser.
     document.addEventListener('DOMContentLoaded', () => {
       telegramWebApp = window.Telegram?.WebApp || null;
@@ -471,10 +502,8 @@
       document.getElementById('refreshJobs').addEventListener('click', loadJobs);
 
       const initialView = new URLSearchParams(window.location.search).get('view') === 'jobs' ? 'jobs' : 'submit';
-      setView(initialView, false);
-      if (initialView === 'submit' && !CONFIG.USER_ID) {
-        showAlert('The job browser is public. Open the Submit tab from Telegram to post a job.', 'error');
-      }
+      setView(CONFIG.USER_ID ? initialView : 'jobs', false);
+      checkSubmitAccess();
     });
 
     // Form submission
