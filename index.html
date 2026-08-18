@@ -2,579 +2,130 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
-  />
-  <title>Submit Job Post</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#07111f" />
+  <title>BLR Jobs — Bengaluru opportunities</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
   <style>
-    html, body {
-      height: 100%;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
+    :root {
+      color-scheme: light;
+      --bg:#f3f6fb;--surface:#fff;--raised:#fff;--muted-surface:#eef3f9;--accent-surface:#eaf4ff;
+      --text:#101828;--text-soft:#475467;--muted:#667085;--line:#dce5f0;--line-strong:#c8d5e4;
+      --primary:#087df1;--primary-strong:#0568cc;--primary-soft:#dcedff;--cyan:#00aebb;
+      --green:#10a56a;--amber:#d88700;--danger:#d92d20;--shadow:0 18px 45px rgba(24,55,88,.12);
+      --safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px)
     }
-
-    body {
-      overscroll-behavior: contain;
+    :root[data-theme="dark"] {
+      color-scheme:dark;--bg:#07111f;--surface:#0d1a2a;--raised:#112235;--muted-surface:#0a1625;
+      --accent-surface:#0a2940;--text:#f5f8fc;--text-soft:#c4d0df;--muted:#8fa1b7;--line:#1d334a;
+      --line-strong:#29455f;--primary:#48a8ff;--primary-strong:#77bdff;--primary-soft:#123a59;
+      --cyan:#35d5d0;--green:#38d39f;--amber:#ffbd55;--danger:#ff7b72;--shadow:0 22px 55px rgba(0,0,0,.3)
     }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      padding: 16px;
-    }
-
-    .container {
-      background: white;
-      border-radius: 20px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      padding: 28px;
-      width: 100%;
-      max-width: 600px;
-      margin: 0 auto;
-    }
-
-    h1 {
-      font-size: 26px;
-      margin-bottom: 6px;
-    }
-
-    .subtitle {
-      font-size: 14px;
-      color: #666;
-      margin-bottom: 20px;
-    }
-
-    .user-info {
-      background: #f5f6fa;
-      padding: 10px 14px;
-      border-radius: 10px;
-      font-size: 14px;
-      margin-bottom: 16px;
-    }
-
-    .form-group {
-      margin-bottom: 16px;
-    }
-
-    label {
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 6px;
-      display: block;
-    }
-
-    input, textarea, select {
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: 10px;
-      border: 2px solid #e0e0e0;
-      font-size: 14px;
-      background: white;
-    }
-
-    input:focus, textarea:focus, select:focus {
-      outline: none;
-      border-color: #667eea;
-    }
-
-    textarea {
-      min-height: 110px;
-      resize: vertical;
-    }
-
-    button {
-      width: 100%;
-      padding: 14px;
-      border-radius: 12px;
-      border: none;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 12px;
-    }
-
-    button:disabled {
-      opacity: 0.6;
-    }
-
-    .alert {
-      display: none;
-      padding: 12px;
-      border-radius: 10px;
-      margin-bottom: 16px;
-      font-size: 14px;
-    }
-
-    .alert.success {
-      background: #d4edda;
-      color: #155724;
-    }
-
-    .alert.error {
-      background: #f8d7da;
-      color: #721c24;
-    }
-
-    .alert.show {
-      display: block;
-    }
-
-    .required {
-      color: #e74c3c;
-    }
-
-    .view-tabs {
-      display: flex;
-      gap: 8px;
-      margin: 0 0 20px;
-      padding: 4px;
-      background: #f5f6fa;
-      border-radius: 12px;
-    }
-
-    .view-tab {
-      flex: 1;
-      margin: 0;
-      padding: 10px 12px;
-      background: transparent;
-      color: #667085;
-      font-size: 14px;
-    }
-
-    .view-tab.active {
-      background: white;
-      color: #4f46e5;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-
-    .jobs-panel {
-      display: none;
-    }
-
-    .jobs-panel.active {
-      display: block;
-    }
-
-    .jobs-toolbar {
-      display: grid;
-      grid-template-columns: 1fr 150px;
-      gap: 8px;
-      margin-bottom: 14px;
-    }
-
-    .jobs-toolbar input,
-    .jobs-toolbar select {
-      min-width: 0;
-    }
-
-    .refresh-button {
-      width: 100%;
-      margin: 0 0 16px;
-      padding: 11px;
-      font-size: 14px;
-    }
-
-    .jobs-status {
-      color: #667085;
-      font-size: 13px;
-      margin-bottom: 12px;
-    }
-
-    .job-card {
-      border: 1px solid #e7e7ef;
-      border-radius: 14px;
-      padding: 16px;
-      margin-bottom: 12px;
-      background: #fff;
-    }
-
-    .job-card h2 {
-      font-size: 17px;
-      line-height: 1.35;
-      margin-bottom: 6px;
-    }
-
-    .job-company {
-      color: #4f46e5;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-
-    .job-meta {
-      color: #667085;
-      font-size: 13px;
-      line-height: 1.6;
-    }
-
-    .job-description {
-      color: #475467;
-      font-size: 13px;
-      line-height: 1.5;
-      margin: 10px 0;
-    }
-
-    .apply-button {
-      display: inline-block;
-      width: auto;
-      margin: 4px 0 0;
-      padding: 10px 16px;
-      text-decoration: none;
-      text-align: center;
-    }
-
-    .empty-state {
-      padding: 24px 8px;
-      text-align: center;
-      color: #667085;
-      font-size: 14px;
-    }
-
-    @media (max-width: 480px) {
-      .container { padding: 20px; }
-      .jobs-toolbar { grid-template-columns: 1fr; }
-    }
+    *{box-sizing:border-box;margin:0;padding:0}html{min-height:100%;background:var(--bg)}
+    body{min-height:100%;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
+      font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:radial-gradient(circle at 92% -5%,color-mix(in srgb,var(--primary) 17%,transparent) 0,transparent 31rem),var(--bg);
+      color:var(--text);padding:calc(12px + var(--safe-top)) 14px calc(30px + var(--safe-bottom));transition:background-color .2s,color .2s}
+    button,input,textarea,select{font:inherit}button,a{-webkit-tap-highlight-color:transparent}button{cursor:pointer}a{color:inherit}
+    .app-shell{width:min(100%,680px);margin:0 auto}.topbar{display:flex;align-items:center;justify-content:space-between;min-height:48px;margin-bottom:14px}
+    .brand{display:flex;align-items:center;gap:11px}.brand-mark{width:42px;height:42px;display:grid;place-items:center;border:1px solid color-mix(in srgb,var(--primary) 35%,var(--line));border-radius:14px;background:linear-gradient(145deg,var(--primary-soft),var(--surface));color:var(--primary);font-size:15px;font-weight:900;letter-spacing:-1px;box-shadow:0 8px 24px color-mix(in srgb,var(--primary) 12%,transparent)}
+    .brand-copy strong{display:block;font-size:15px;letter-spacing:.15em}.brand-copy span{display:block;margin-top:2px;color:var(--muted);font-size:11px}
+    .icon-button{width:42px;height:42px;display:grid;place-items:center;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--text-soft);box-shadow:0 6px 20px color-mix(in srgb,var(--text) 7%,transparent)}.icon-button svg{width:20px;height:20px}
+    .hero{position:relative;overflow:hidden;padding:24px 20px 20px;border:1px solid var(--line);border-radius:24px;background:linear-gradient(145deg,var(--raised),var(--surface));box-shadow:var(--shadow)}
+    .hero:after{content:"";position:absolute;width:190px;height:190px;right:-92px;top:-106px;border:32px solid color-mix(in srgb,var(--primary) 9%,transparent);border-radius:50%;pointer-events:none}
+    .eyebrow{display:flex;align-items:center;gap:7px;color:var(--cyan);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
+    .live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 5px color-mix(in srgb,var(--green) 13%,transparent)}
+    .hero h1{position:relative;max-width:520px;margin-top:12px;font-size:clamp(30px,8vw,44px);line-height:1.04;letter-spacing:-.045em}.hero h1 span{color:var(--primary)}
+    .hero-subtitle{max-width:520px;margin-top:11px;color:var(--text-soft);font-size:14px;line-height:1.55}.hero-meta{display:flex;flex-wrap:wrap;gap:9px 15px;margin-top:18px;padding-top:15px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}.hero-meta span{display:inline-flex;align-items:center;gap:6px}.hero-meta strong{color:var(--text);font-weight:750}
+    .view-tabs{position:sticky;top:calc(8px + var(--safe-top));z-index:10;display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:14px 0;padding:5px;border:1px solid var(--line);border-radius:16px;background:color-mix(in srgb,var(--surface) 90%,transparent);box-shadow:0 8px 25px color-mix(in srgb,var(--text) 8%,transparent);backdrop-filter:blur(16px)}
+    .view-tabs:has(.view-tab[hidden]){grid-template-columns:1fr}.view-tab{min-height:42px;border:0;border-radius:12px;background:transparent;color:var(--muted);font-size:13px;font-weight:750}.view-tab.active{background:var(--primary-soft);color:var(--primary-strong);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--primary) 15%,transparent)}
+    .panel{display:none}.panel.active{display:block}.search-block{padding:14px;border:1px solid var(--line);border-radius:20px;background:var(--surface)}.search-row{display:grid;grid-template-columns:minmax(0,1fr) 46px;gap:8px}.search-wrap{position:relative}.search-wrap svg{position:absolute;left:14px;top:50%;width:19px;height:19px;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+    input,textarea,select{width:100%;border:1px solid var(--line-strong);border-radius:13px;outline:0;background:var(--muted-surface);color:var(--text);font-size:14px;transition:border-color .18s,box-shadow .18s,background .18s}input{min-height:46px;padding:11px 13px}.search-wrap input{padding-left:42px}textarea{min-height:120px;padding:12px 13px;resize:vertical;line-height:1.5}select{min-height:46px;padding:10px 38px 10px 13px}input::placeholder,textarea::placeholder{color:var(--muted)}input:focus,textarea:focus,select:focus{border-color:var(--primary);background:var(--surface);box-shadow:0 0 0 4px color-mix(in srgb,var(--primary) 13%,transparent)}
+    .refresh-button{margin:0;border-radius:13px}.refresh-button.loading svg{animation:spin .75s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+    .filter-chips{display:flex;gap:8px;margin-top:11px;overflow-x:auto;scrollbar-width:none}.filter-chips::-webkit-scrollbar{display:none}.filter-chip{flex:0 0 auto;min-height:34px;padding:7px 12px;border:1px solid var(--line);border-radius:999px;background:var(--muted-surface);color:var(--text-soft);font-size:12px;font-weight:700}.filter-chip.active{border-color:var(--primary);background:var(--primary-soft);color:var(--primary-strong)}
+    .results-bar{display:flex;align-items:center;justify-content:space-between;min-height:43px;padding:13px 2px 8px;color:var(--muted);font-size:12px}.results-bar strong{color:var(--text-soft)}.jobs-list{display:grid;gap:10px}
+    .job-card{position:relative;padding:17px;border:1px solid var(--line);border-radius:19px;background:var(--surface);box-shadow:0 8px 24px color-mix(in srgb,var(--text) 5%,transparent);transition:transform .16s,border-color .16s}.job-card:active{transform:scale(.992)}
+    .job-head{display:grid;grid-template-columns:44px minmax(0,1fr);gap:12px}.company-mark{width:44px;height:44px;display:grid;place-items:center;border:1px solid color-mix(in srgb,var(--primary) 20%,var(--line));border-radius:13px;background:linear-gradient(145deg,var(--primary-soft),var(--muted-surface));color:var(--primary-strong);font-size:15px;font-weight:850;text-transform:uppercase}.job-card h2{padding-right:2px;font-size:17px;line-height:1.3;letter-spacing:-.015em}.job-company{margin-top:4px;color:var(--primary-strong);font-size:13px;font-weight:700}
+    .job-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}.job-tag{display:inline-flex;align-items:center;gap:5px;padding:6px 9px;border-radius:9px;background:var(--muted-surface);color:var(--text-soft);font-size:11px;font-weight:650}.job-tag.deadline{background:color-mix(in srgb,var(--amber) 12%,var(--muted-surface));color:var(--amber)}
+    .job-description{display:-webkit-box;overflow:hidden;margin-top:12px;color:var(--muted);font-size:13px;line-height:1.55;-webkit-box-orient:vertical;-webkit-line-clamp:3}.job-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px;padding-top:13px;border-top:1px solid var(--line)}.posted-at{color:var(--muted);font-size:11px}
+    .primary-button,.secondary-button,.apply-button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:43px;padding:10px 15px;border:0;border-radius:12px;text-decoration:none;font-size:13px;font-weight:800}.primary-button,.apply-button{background:var(--primary);color:#fff}.primary-button:hover,.apply-button:hover{background:var(--primary-strong)}.secondary-button{border:1px solid var(--line-strong);background:var(--muted-surface);color:var(--text)}.apply-button{min-height:38px;padding:8px 13px}.primary-button:disabled,.secondary-button:disabled{opacity:.58;cursor:wait}
+    .empty-state,.subscriber-gate{padding:30px 20px;border:1px solid var(--line);border-radius:20px;background:var(--surface);text-align:center}.state-icon{width:54px;height:54px;display:grid;place-items:center;margin:0 auto 14px;border-radius:17px;background:var(--primary-soft);color:var(--primary-strong);font-size:24px}.subscriber-gate h3,.empty-state h3{font-size:18px}.subscriber-gate p,.empty-state p{max-width:410px;margin:8px auto 0;color:var(--muted);font-size:13px;line-height:1.55}.subscriber-actions{display:grid;gap:8px;max-width:390px;margin:18px auto 0}
+    .skeleton{overflow:hidden}.skeleton:after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--text) 7%,transparent),transparent);animation:shimmer 1.2s infinite}.skeleton-line{height:11px;margin:8px 0;border-radius:6px;background:var(--muted-surface)}@keyframes shimmer{to{transform:translateX(100%)}}
+    .form-card{padding:19px;border:1px solid var(--line);border-radius:22px;background:var(--surface)}.form-heading h2{font-size:22px;letter-spacing:-.025em}.form-heading p{margin:6px 0 20px;color:var(--muted);font-size:13px;line-height:1.5}.user-info{display:none;margin-bottom:16px;padding:10px 12px;border-radius:11px;background:var(--accent-surface);color:var(--primary-strong);font-size:12px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.form-group{margin-bottom:14px}.form-group.full{grid-column:1/-1}label{display:block;margin-bottom:7px;color:var(--text-soft);font-size:12px;font-weight:750}.required{color:var(--danger)}.form-note{margin:4px 0 14px;color:var(--muted);font-size:12px;line-height:1.5}#submitBtn{width:100%;margin-top:4px}
+    .alert{position:fixed;z-index:30;left:50%;top:calc(14px + var(--safe-top));width:min(calc(100% - 28px),620px);padding:13px 15px;border:1px solid var(--line);border-radius:13px;background:var(--raised);box-shadow:var(--shadow);color:var(--text);font-size:13px;line-height:1.45;opacity:0;pointer-events:none;transform:translate(-50%,-12px);transition:opacity .2s,transform .2s}.alert.show{opacity:1;transform:translate(-50%,0)}.alert.success{border-color:color-mix(in srgb,var(--green) 55%,var(--line))}.alert.error{border-color:color-mix(in srgb,var(--danger) 55%,var(--line))}
+    @media(max-width:520px){body{padding-left:10px;padding-right:10px}.hero{padding:22px 17px 18px;border-radius:21px}.form-grid{grid-template-columns:1fr;gap:0}.form-group.full{grid-column:auto}}@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
   </style>
 </head>
-
 <body>
-  <div class="container">
-    <h1>📋 Submit Job Post</h1>
-    <p class="subtitle">Fill in the details to post a new job opportunity</p>
-
-    <div id="userInfo" class="user-info" style="display:none;">
-      👤 Logged in as <strong id="userName"></strong>
-    </div>
-
-    <div id="alert" class="alert"></div>
-
-    <div class="view-tabs" role="tablist" aria-label="Job bot views">
-      <button type="button" class="view-tab active" data-view="submit">Submit a job</button>
-      <button type="button" class="view-tab" data-view="jobs">Latest jobs</button>
-    </div>
-
-    <section id="jobsPanel" class="jobs-panel" aria-labelledby="jobsHeading">
-      <h2 id="jobsHeading" style="font-size:22px; margin-bottom:6px;">📢 Latest Bengaluru Jobs</h2>
-      <p class="subtitle">New openings from the last 7 days. Apply through the official listing.</p>
-
-      <form id="jobsFilterForm" class="jobs-toolbar">
-        <input id="jobSearch" type="search" placeholder="Search title, company, or skill" aria-label="Search jobs" />
-        <select id="jobCategory" aria-label="Filter by category">
-          <option value="">All categories</option>
-          <option value="private">Private jobs</option>
-          <option value="government">Government / PSU</option>
-        </select>
-      </form>
-      <button id="refreshJobs" type="button" class="refresh-button">Refresh latest jobs</button>
-      <div id="jobsStatus" class="jobs-status" aria-live="polite"></div>
-      <div id="jobsList"></div>
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="brand"><div class="brand-mark">BLR</div><div class="brand-copy"><strong>BLR JOBS</strong><span>Verified Bengaluru opportunities</span></div></div>
+      <button id="themeToggle" class="icon-button" type="button" aria-label="Switch theme" title="Switch theme"></button>
+    </header>
+    <section class="hero" aria-labelledby="heroTitle">
+      <div class="eyebrow"><span class="live-dot"></span>Fresh opportunities · 7-day window</div>
+      <h1 id="heroTitle">Your next move,<br><span>closer to home.</span></h1>
+      <p class="hero-subtitle">Search Bengaluru roles from official company listings. Less noise, faster applications.</p>
+      <div class="hero-meta"><span><strong id="heroJobCount">—</strong> live roles</span><span>✓ Official apply links</span><span>↻ Updated daily</span></div>
     </section>
-
-    <form id="jobForm">
-      <div class="form-group">
-        <label>Job Title <span class="required">*</span></label>
-        <input type="text" id="title" required placeholder="e.g., Senior Frontend Developer" />
-      </div>
-
-      <div class="form-group">
-        <label>Company Name <span class="required">*</span></label>
-        <input type="text" id="company" required placeholder="e.g., Tech Corp Inc." />
-      </div>
-
-      <div class="form-group">
-        <label>Location <span class="required">*</span></label>
-        <input type="text" id="location" required placeholder="e.g., Remote, New York, or Bangalore" />
-      </div>
-
-      <div class="form-group">
-        <label>Job Type <span class="required">*</span></label>
-        <select id="type" required>
-          <option value="">Select job type</option>
-          <option value="Full-time">Full-time</option>
-          <option value="Part-time">Part-time</option>
-          <option value="Contract">Contract</option>
-          <option value="Freelance">Freelance</option>
-          <option value="Internship">Internship</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>Salary Range</label>
-        <input type="text" id="salary" placeholder="e.g., $80,000 - $120,000 or Not disclosed" />
-      </div>
-
-      <div class="form-group">
-        <label>Job Description <span class="required">*</span></label>
-        <textarea id="description" required placeholder="Describe the role, responsibilities, and requirements..."></textarea>
-      </div>
-
-      <p style="font-size: 13px; color: #666; margin: 16px 0 8px;">
-        <strong>Contact Method:</strong> Provide at least one
-      </p>
-
-      <div class="form-group">
-        <label>Application Link</label>
-        <input type="url" id="applyLink" placeholder="https://company.com/apply" />
-      </div>
-
-      <div class="form-group">
-        <label>Email Address</label>
-        <input type="email" id="email" placeholder="jobs@company.com" />
-      </div>
-
-      <div class="form-group">
-        <label>Phone / WhatsApp Number</label>
-        <input type="tel" id="phone" placeholder="+1 234 567 8900 or WhatsApp: +91 98765 43210" />
-      </div>
-
-      <button id="submitBtn" type="submit">Submit Job Post</button>
-    </form>
-  </div>
-
+    <div id="alert" class="alert" role="status" aria-live="polite"></div>
+    <nav class="view-tabs" role="tablist" aria-label="Job app views">
+      <button type="button" class="view-tab active" data-view="jobs" role="tab">Explore jobs</button>
+      <button type="button" class="view-tab" data-view="submit" role="tab">Post a job</button>
+    </nav>
+    <section id="jobsPanel" class="panel active" aria-labelledby="jobsHeading">
+      <h2 id="jobsHeading" hidden>Latest Bengaluru jobs</h2>
+      <form id="jobsFilterForm" class="search-block">
+        <div class="search-row">
+          <div class="search-wrap"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path></svg><input id="jobSearch" type="search" placeholder="Role, company or skill" autocomplete="off" aria-label="Search jobs" /></div>
+          <button id="refreshJobs" class="icon-button refresh-button" type="button" aria-label="Refresh jobs" title="Refresh jobs"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 11a8 8 0 1 0-2.3 5.7"></path><path d="M20 4v7h-7"></path></svg></button>
+        </div>
+        <div class="filter-chips" aria-label="Job type filters"><button type="button" class="filter-chip active" data-category="">All roles</button><button type="button" class="filter-chip" data-category="private">Private</button><button type="button" class="filter-chip" data-category="government">Government / PSU</button></div>
+      </form>
+      <div class="results-bar"><span id="jobsStatus" aria-live="polite">Checking fresh roles…</span><span id="lastUpdated"></span></div>
+      <div id="jobsList" class="jobs-list"></div>
+    </section>
+    <section id="submitPanel" class="panel" aria-labelledby="submitHeading">
+      <form id="jobForm" class="form-card">
+        <div class="form-heading"><h2 id="submitHeading">Post an opportunity</h2><p>Admin-only submission. Every role is reviewed before it reaches the channel.</p></div>
+        <div id="userInfo" class="user-info">Signed in as <strong id="userName"></strong></div>
+        <div class="form-grid">
+          <div class="form-group full"><label for="title">Job title <span class="required">*</span></label><input id="title" type="text" required placeholder="Senior Frontend Developer" /></div>
+          <div class="form-group"><label for="company">Company <span class="required">*</span></label><input id="company" type="text" required placeholder="Company name" /></div>
+          <div class="form-group"><label for="location">Location <span class="required">*</span></label><input id="location" type="text" required placeholder="Bengaluru / Hybrid" /></div>
+          <div class="form-group"><label for="type">Job type <span class="required">*</span></label><select id="type" required><option value="">Select type</option><option>Full-time</option><option>Part-time</option><option>Contract</option><option>Freelance</option><option>Internship</option></select></div>
+          <div class="form-group"><label for="salary">Salary range</label><input id="salary" type="text" placeholder="₹12–18 LPA / Not disclosed" /></div>
+          <div class="form-group full"><label for="description">Description <span class="required">*</span></label><textarea id="description" required placeholder="Role, responsibilities and key requirements…"></textarea></div>
+          <div class="form-group full"><p class="form-note"><strong>Application method:</strong> add at least one official link or contact.</p></div>
+          <div class="form-group full"><label for="applyLink">Application link</label><input id="applyLink" type="url" placeholder="https://company.com/careers/role" /></div>
+          <div class="form-group"><label for="email">Email</label><input id="email" type="email" placeholder="jobs@company.com" /></div>
+          <div class="form-group"><label for="phone">Phone / WhatsApp</label><input id="phone" type="tel" placeholder="+91 98765 43210" /></div>
+        </div>
+        <button id="submitBtn" class="primary-button" type="submit">Submit for review</button>
+      </form>
+    </section>
+  </main>
   <script>
-    const CONFIG = {
-      WORKER_URL: 'https://tgjbt.puneethtpp.workers.dev/api/submit-job',
-      LATEST_JOBS_URL: 'https://tgjbt.puneethtpp.workers.dev/api/latest-jobs',
-      ACCESS_CHECK_URL: 'https://tgjbt.puneethtpp.workers.dev/api/access-check',
-      USER_ID: null
-    };
-
-    const alertBox = document.getElementById('alert');
-    const submitBtn = document.getElementById('submitBtn');
-    const jobForm = document.getElementById('jobForm');
-    const jobsPanel = document.getElementById('jobsPanel');
-    const jobsList = document.getElementById('jobsList');
-    const jobsStatus = document.getElementById('jobsStatus');
-    const jobsFilterForm = document.getElementById('jobsFilterForm');
-    let telegramWebApp = null;
-
-    function showAlert(msg, type) {
-      alertBox.textContent = msg;
-      alertBox.className = `alert ${type} show`;
-      setTimeout(() => alertBox.classList.remove('show'), 5000);
-    }
-
-    function escapeHtml(value) {
-      return String(value || '').replace(/[&<>'"]/g, character => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
-      }[character]));
-    }
-
-    function safeApplyLink(value) {
-      try {
-        const url = new URL(value);
-        return ['http:', 'https:'].includes(url.protocol) ? url.toString() : '';
-      } catch (_) {
-        return '';
-      }
-    }
-
-    function formatJobDate(value) {
-      const date = new Date(value);
-      return Number.isNaN(date.getTime())
-        ? 'Date not specified'
-        : date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-    }
-
-    function setView(view, updateUrl = true) {
-      const showJobs = view === 'jobs';
-      jobForm.style.display = showJobs ? 'none' : 'block';
-      jobsPanel.classList.toggle('active', showJobs);
-      document.querySelectorAll('.view-tab').forEach(button => {
-        button.classList.toggle('active', button.dataset.view === view);
-      });
-      if (updateUrl) {
-        const nextUrl = new URL(window.location.href);
-        if (showJobs) nextUrl.searchParams.set('view', 'jobs');
-        else nextUrl.searchParams.delete('view');
-        window.history.replaceState({}, '', nextUrl);
-      }
-      if (showJobs) loadJobs();
-    }
-
-    function renderJobs(jobs) {
-      if (!jobs.length) {
-        jobsList.innerHTML = '<div class="empty-state">No matching jobs were found in the latest 7-day window.</div>';
-        return;
-      }
-
-      jobsList.innerHTML = jobs.map(job => {
-        const applyLink = safeApplyLink(job.applyLink);
-        const contact = [job.email, job.phone].filter(Boolean).map(escapeHtml).join(' · ');
-        const action = applyLink
-          ? `<a class="apply-button" href="${escapeHtml(applyLink)}" target="_blank" rel="noopener noreferrer">🔗 Apply now</a>`
-          : (contact ? `<div class="job-meta">Contact: ${contact}</div>` : '<div class="job-meta">Application details are in the listing.</div>');
-        return `<article class="job-card">
-          <h2>${escapeHtml(job.title)}</h2>
-          <div class="job-company">🏢 ${escapeHtml(job.company)}</div>
-          <div class="job-meta">📍 ${escapeHtml(job.location)} · 🧾 ${escapeHtml(job.jobType)}<br>🗓️ Posted ${escapeHtml(formatJobDate(job.publishedAt))}</div>
-          ${job.deadline ? `<div class="job-meta">⏳ Apply by ${escapeHtml(formatJobDate(job.deadline))}</div>` : ''}
-          ${job.salary ? `<div class="job-meta">💰 ${escapeHtml(job.salary)}</div>` : ''}
-          ${job.description ? `<p class="job-description">${escapeHtml(job.description)}</p>` : ''}
-          ${action}
-        </article>`;
-      }).join('');
-    }
-
-    async function loadJobs() {
-      const query = document.getElementById('jobSearch').value.trim();
-      const category = document.getElementById('jobCategory').value;
-      const params = new URLSearchParams({ limit: '50', days: '7' });
-      if (query) params.set('q', query);
-      if (category) params.set('category', category);
-
-      jobsStatus.textContent = 'Loading latest jobs…';
-      jobsList.innerHTML = '';
-      try {
-        const res = await fetch(`${CONFIG.LATEST_JOBS_URL}?${params.toString()}`);
-        const data = await res.json();
-        if (!res.ok || !data.success) throw new Error(data.error || 'Unable to load jobs');
-        jobsStatus.textContent = `${data.count} latest job${data.count === 1 ? '' : 's'} found`;
-        renderJobs(data.jobs || []);
-      } catch (error) {
-        jobsStatus.textContent = '';
-        jobsList.innerHTML = `<div class="empty-state">Unable to load jobs right now. Please try again.</div>`;
-        console.error('Latest jobs error:', error);
-      }
-    }
-
-    async function checkSubmitAccess() {
-      const submitTab = document.querySelector('.view-tab[data-view="submit"]');
-      if (!telegramWebApp?.initData || !CONFIG.USER_ID) {
-        submitTab.hidden = true;
-        setView('jobs', false);
-        return;
-      }
-
-      try {
-        const res = await fetch(CONFIG.ACCESS_CHECK_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ initData: telegramWebApp.initData })
-        });
-        const data = await res.json();
-        if (!res.ok || !data.success || !data.canSubmit) {
-          submitTab.hidden = true;
-          setView('jobs', false);
-          showAlert('Browse access enabled. Job submission is limited to authorized users.', 'error');
-          return;
-        }
-        submitTab.hidden = false;
-      } catch (error) {
-        submitTab.hidden = true;
-        setView('jobs', false);
-        showAlert('Could not verify submission access. Browse mode enabled.', 'error');
-        console.error('Access check error:', error);
-      }
-    }
-
-    // Initialize Telegram Web App when available. The public jobs view also works in a normal browser.
-    document.addEventListener('DOMContentLoaded', () => {
-      telegramWebApp = window.Telegram?.WebApp || null;
-      if (telegramWebApp?.initDataUnsafe?.user) {
-        telegramWebApp.ready();
-        telegramWebApp.expand();
-        telegramWebApp.enableClosingConfirmation();
-        telegramWebApp.disableVerticalSwipes();
-        const user = telegramWebApp.initDataUnsafe.user;
-        CONFIG.USER_ID = user.id;
-        document.getElementById('userName').textContent = user.first_name || 'User';
-        document.getElementById('userInfo').style.display = 'block';
-      }
-
-      document.querySelectorAll('.view-tab').forEach(button => {
-        button.addEventListener('click', () => setView(button.dataset.view));
-      });
-      jobsFilterForm.addEventListener('submit', event => {
-        event.preventDefault();
-        loadJobs();
-      });
-      document.getElementById('refreshJobs').addEventListener('click', loadJobs);
-
-      const queryRequestsJobs = new URLSearchParams(window.location.search).get('view') === 'jobs';
-      const miniAppRequestsJobs = telegramWebApp?.initDataUnsafe?.start_param === 'jobs';
-      const initialView = queryRequestsJobs || miniAppRequestsJobs ? 'jobs' : 'submit';
-      setView(CONFIG.USER_ID ? initialView : 'jobs', false);
-      checkSubmitAccess();
-    });
-
-    // Form submission
-    jobForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      if (!CONFIG.USER_ID) {
-        showAlert('❌ User ID not found. Please open this form through Telegram.', 'error');
-        return;
-      }
-
-      // Validate at least one contact method
-      const applyLink = document.getElementById('applyLink').value.trim();
-      const email = document.getElementById('email').value.trim();
-      const phone = document.getElementById('phone').value.trim();
-
-      if (!applyLink && !email && !phone) {
-        showAlert('⚠️ Please provide at least one contact method (Link, Email, or Phone)', 'error');
-        return;
-      }
-
-      // Build payload with explicit getElementById calls
-      const payload = {
-        title: document.getElementById('title').value.trim(),
-        company: document.getElementById('company').value.trim(),
-        location: document.getElementById('location').value.trim(),
-        type: document.getElementById('type').value,
-        salary: document.getElementById('salary').value.trim(),
-        description: document.getElementById('description').value.trim(),
-        applyLink: applyLink,
-        email: email,
-        phone: phone,
-        userId: CONFIG.USER_ID,
-        initData: telegramWebApp?.initData || ''
-      };
-
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Submitting...';
-
-      try {
-        const res = await fetch(CONFIG.WORKER_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-
-        const data = await res.json();
-        
-        if (data.success) {
-          showAlert('✅ Job submitted successfully! It will be reviewed before posting.', 'success');
-          document.getElementById('jobForm').reset();
-          
-          // Close Telegram Web App after success
-          setTimeout(() => {
-            if (window.Telegram && Telegram.WebApp) {
-              Telegram.WebApp.close();
-            }
-          }, 2000);
-        } else {
-          showAlert('❌ Error: ' + (data.error || 'Submission failed'), 'error');
-        }
-      } catch (error) {
-        showAlert('❌ Network error. Please try again.', 'error');
-        console.error('Submission error:', error);
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Submit Job Post';
-      }
-    });
+    const CONFIG={WORKER_URL:'https://tgjbt.puneethtpp.workers.dev/api/submit-job',LATEST_JOBS_URL:'https://tgjbt.puneethtpp.workers.dev/api/latest-jobs',ACCESS_CHECK_URL:'https://tgjbt.puneethtpp.workers.dev/api/access-check',BOT_APP_URL:'https://t.me/Blrjobs_bot?startapp=jobs',USER_ID:null};
+    const icons={dark:'<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.5 14.2A8 8 0 0 1 9.8 3.5 8.2 8.2 0 1 0 20.5 14.2Z"></path></svg>',light:'<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>'};
+    const alertBox=document.getElementById('alert'),submitBtn=document.getElementById('submitBtn'),jobForm=document.getElementById('jobForm'),jobsPanel=document.getElementById('jobsPanel'),submitPanel=document.getElementById('submitPanel'),jobsList=document.getElementById('jobsList'),jobsStatus=document.getElementById('jobsStatus'),jobsFilterForm=document.getElementById('jobsFilterForm'),refreshJobsButton=document.getElementById('refreshJobs'),themeToggle=document.getElementById('themeToggle');
+    let telegramWebApp=null,selectedCategory='',searchTimer=null,isLoadingJobs=false;
+    function resolveTheme(){const saved=localStorage.getItem('blr-jobs-theme');if(saved==='light'||saved==='dark')return saved;if(telegramWebApp?.colorScheme)return telegramWebApp.colorScheme;return matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}
+    function applyTheme(theme,persist=false){document.documentElement.dataset.theme=theme;document.querySelector('meta[name="theme-color"]').content=theme==='dark'?'#07111f':'#f3f6fb';themeToggle.innerHTML=theme==='dark'?icons.light:icons.dark;themeToggle.setAttribute('aria-label',theme==='dark'?'Use light mode':'Use dark mode');themeToggle.title=theme==='dark'?'Use light mode':'Use dark mode';if(persist)localStorage.setItem('blr-jobs-theme',theme);try{telegramWebApp?.setHeaderColor(theme==='dark'?'#07111f':'#f3f6fb');telegramWebApp?.setBackgroundColor(theme==='dark'?'#07111f':'#f3f6fb')}catch(_){}}
+    function haptic(style='light'){try{telegramWebApp?.HapticFeedback?.impactOccurred(style)}catch(_){}}
+    function showAlert(message,type){alertBox.textContent=message;alertBox.className=`alert ${type} show`;clearTimeout(showAlert.timeout);showAlert.timeout=setTimeout(()=>alertBox.classList.remove('show'),4500)}
+    function escapeHtml(value){return String(value||'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+    function safeApplyLink(value){try{const url=new URL(value);return['http:','https:'].includes(url.protocol)?url.toString():''}catch(_){return''}}
+    function formatJobDate(value,relative=false){const date=new Date(value);if(Number.isNaN(date.getTime()))return relative?'Recently added':'Date not specified';if(relative){const days=Math.max(0,Math.floor((Date.now()-date.getTime())/86400000));if(days===0)return'Added today';if(days===1)return'Added yesterday';if(days<7)return`Added ${days} days ago`}return date.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}
+    function companyInitials(company){const ignored=new Set(['and','of','the','&']);const parts=String(company||'Job').trim().split(/\s+/).filter(p=>!ignored.has(p.toLowerCase()));return parts.slice(0,2).map(p=>p[0]).join('').slice(0,2)||'J'}
+    function setView(view,updateUrl=true){const showJobs=view==='jobs';jobsPanel.classList.toggle('active',showJobs);submitPanel.classList.toggle('active',!showJobs);document.querySelectorAll('.view-tab').forEach(button=>{const active=button.dataset.view===view;button.classList.toggle('active',active);button.setAttribute('aria-selected',String(active))});if(updateUrl){const nextUrl=new URL(location.href);nextUrl.searchParams.set('view',showJobs?'jobs':'submit');history.replaceState({},'',nextUrl)}haptic();if(showJobs&&!jobsList.childElementCount)loadJobs();scrollTo({top:0,behavior:'smooth'})}
+    function renderLoading(){jobsList.innerHTML=[1,2,3].map(()=>'<article class="job-card skeleton" aria-hidden="true"><div class="job-head"><div class="company-mark"></div><div><div class="skeleton-line" style="width:72%"></div><div class="skeleton-line" style="width:45%"></div></div></div><div class="skeleton-line" style="width:88%;margin-top:18px"></div><div class="skeleton-line" style="width:64%"></div></article>').join('')}
+    function renderJobs(jobs){document.getElementById('heroJobCount').textContent=jobs.length;if(!jobs.length){jobsList.innerHTML='<div class="empty-state"><div class="state-icon">⌕</div><h3>No matching roles</h3><p>Try a company name, a broader skill, or switch back to all roles.</p></div>';return}jobsList.innerHTML=jobs.map(job=>{const applyLink=safeApplyLink(job.applyLink),contact=[job.email,job.phone].filter(Boolean).map(escapeHtml).join(' · ');const action=applyLink?`<a class="apply-button" href="${escapeHtml(applyLink)}" target="_blank" rel="noopener noreferrer">Apply <span aria-hidden="true">↗</span></a>`:(contact?`<a class="apply-button" href="${job.email?`mailto:${escapeHtml(job.email)}`:`tel:${escapeHtml(job.phone)}`}">Contact</a>`:'');return `<article class="job-card"><div class="job-head"><div class="company-mark">${escapeHtml(companyInitials(job.company))}</div><div><h2>${escapeHtml(job.title)}</h2><div class="job-company">${escapeHtml(job.company)}</div></div></div><div class="job-tags"><span class="job-tag">⌖ ${escapeHtml(job.location||'Location not specified')}</span><span class="job-tag">◷ ${escapeHtml(job.jobType||'Not specified')}</span>${job.salary?`<span class="job-tag">₹ ${escapeHtml(job.salary)}</span>`:''}${job.deadline?`<span class="job-tag deadline">Apply by ${escapeHtml(formatJobDate(job.deadline))}</span>`:''}</div>${job.description?`<p class="job-description">${escapeHtml(job.description)}</p>`:''}<div class="job-footer"><span class="posted-at">${escapeHtml(formatJobDate(job.publishedAt,true))}</span>${action}</div></article>`}).join('');jobsList.querySelectorAll('a[href]').forEach(link=>link.addEventListener('click',()=>haptic('medium')))}
+    function renderSubscriberGate(data={}){const links=Array.isArray(data.joinLinks)?data.joinLinks:[],openInTelegram=data.code==='OPEN_IN_TELEGRAM',unavailable=data.code==='MEMBERSHIP_UNAVAILABLE';let actions='';if(openInTelegram)actions=`<a class="apply-button" href="${escapeHtml(CONFIG.BOT_APP_URL)}">Open in Telegram <span aria-hidden="true">↗</span></a>`;else if(unavailable)actions='<button id="recheckSubscription" class="secondary-button" type="button">Try verification again</button>';else actions=`${links.map((link,index)=>`<a class="apply-button" href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">Join ${links.length>1?`job channel ${index+1}`:'job channel'} <span aria-hidden="true">↗</span></a>`).join('')}<button id="recheckSubscription" class="secondary-button" type="button">I’ve joined — verify access</button>`;jobsStatus.textContent='Subscriber access';document.getElementById('heroJobCount').textContent='—';jobsList.innerHTML=`<div class="subscriber-gate"><div class="state-icon">${unavailable?'↻':'🔒'}</div><h3>${unavailable?'Verification unavailable':'Jobs for subscribers'}</h3><p>${escapeHtml(data.error||(openInTelegram?'Open this Mini App through @Blrjobs_bot so Telegram can verify you.':'Join either job channel, then return here to unlock the latest roles.'))}</p><div class="subscriber-actions">${actions}</div></div>`;document.getElementById('recheckSubscription')?.addEventListener('click',loadJobs)}
+    async function loadJobs(){if(isLoadingJobs)return;isLoadingJobs=true;const query=document.getElementById('jobSearch').value.trim(),params=new URLSearchParams({limit:'50',days:'7'});if(query)params.set('q',query);if(selectedCategory)params.set('category',selectedCategory);jobsStatus.textContent='Scanning fresh roles…';document.getElementById('lastUpdated').textContent='';refreshJobsButton.classList.add('loading');renderLoading();try{const response=await fetch(`${CONFIG.LATEST_JOBS_URL}?${params}`,{headers:{'X-Telegram-Init-Data':telegramWebApp?.initData||''}}),data=await response.json();if([401,403,503].includes(response.status)||['SUBSCRIPTION_REQUIRED','OPEN_IN_TELEGRAM','MEMBERSHIP_UNAVAILABLE'].includes(data.code)){renderSubscriberGate(data);return}if(!response.ok||!data.success)throw new Error(data.error||'Unable to load jobs');const jobs=data.jobs||[];jobsStatus.innerHTML=`<strong>${data.count}</strong> fresh job${data.count===1?'':'s'}`;document.getElementById('lastUpdated').textContent='Updated now';renderJobs(jobs)}catch(error){jobsStatus.textContent='Couldn’t refresh jobs';jobsList.innerHTML='<div class="empty-state"><div class="state-icon">↻</div><h3>Unable to load roles</h3><p>Check your connection and try refreshing in a moment.</p></div>';console.error('Latest jobs error:',error)}finally{isLoadingJobs=false;refreshJobsButton.classList.remove('loading')}}
+    async function checkSubmitAccess(){const submitTab=document.querySelector('.view-tab[data-view="submit"]');if(!telegramWebApp?.initData||!CONFIG.USER_ID){submitTab.hidden=true;setView('jobs',false);return}try{const response=await fetch(CONFIG.ACCESS_CHECK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData:telegramWebApp.initData})}),data=await response.json();if(!response.ok||!data.success||!data.canBrowse){submitTab.hidden=true;setView('jobs',false);renderSubscriberGate(data);return}if(!data.canSubmit){submitTab.hidden=true;setView('jobs',false);return}submitTab.hidden=false}catch(error){submitTab.hidden=true;setView('jobs',false);console.error('Access check error:',error)}}
+    document.addEventListener('DOMContentLoaded',()=>{telegramWebApp=window.Telegram?.WebApp||null;telegramWebApp?.ready();telegramWebApp?.expand();try{telegramWebApp?.disableVerticalSwipes()}catch(_){}if(telegramWebApp?.initDataUnsafe?.user){const user=telegramWebApp.initDataUnsafe.user;CONFIG.USER_ID=user.id;document.getElementById('userName').textContent=user.first_name||'Admin';document.getElementById('userInfo').style.display='block'}applyTheme(resolveTheme());themeToggle.addEventListener('click',()=>{haptic();applyTheme(document.documentElement.dataset.theme==='dark'?'light':'dark',true)});telegramWebApp?.onEvent?.('themeChanged',()=>{if(!localStorage.getItem('blr-jobs-theme'))applyTheme(resolveTheme())});document.querySelectorAll('.view-tab').forEach(button=>button.addEventListener('click',()=>setView(button.dataset.view)));document.querySelectorAll('.filter-chip').forEach(button=>button.addEventListener('click',()=>{selectedCategory=button.dataset.category;document.querySelectorAll('.filter-chip').forEach(chip=>chip.classList.toggle('active',chip===button));haptic();loadJobs()}));jobsFilterForm.addEventListener('submit',event=>{event.preventDefault();loadJobs()});document.getElementById('jobSearch').addEventListener('input',()=>{clearTimeout(searchTimer);searchTimer=setTimeout(loadJobs,450)});refreshJobsButton.addEventListener('click',()=>{haptic();loadJobs()});const requestedView=new URLSearchParams(location.search).get('view');setView(requestedView==='submit'&&CONFIG.USER_ID?'submit':'jobs',false);checkSubmitAccess()});
+    jobForm.addEventListener('submit',async event=>{event.preventDefault();if(!CONFIG.USER_ID){showAlert('Open this form through Telegram to continue.','error');return}const applyLink=document.getElementById('applyLink').value.trim(),email=document.getElementById('email').value.trim(),phone=document.getElementById('phone').value.trim();if(!applyLink&&!email&&!phone){showAlert('Add an application link, email, or phone number.','error');return}const payload={title:document.getElementById('title').value.trim(),company:document.getElementById('company').value.trim(),location:document.getElementById('location').value.trim(),type:document.getElementById('type').value,salary:document.getElementById('salary').value.trim(),description:document.getElementById('description').value.trim(),applyLink,email,phone,userId:CONFIG.USER_ID,initData:telegramWebApp?.initData||''};submitBtn.disabled=true;submitBtn.textContent='Submitting…';try{const response=await fetch(CONFIG.WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}),data=await response.json();if(!response.ok||!data.success)throw new Error(data.error||'Submission failed');haptic('medium');showAlert('Job submitted for review.','success');jobForm.reset()}catch(error){showAlert(error.message||'Network error. Please try again.','error')}finally{submitBtn.disabled=false;submitBtn.textContent='Submit for review'}});
   </script>
 </body>
 </html>
